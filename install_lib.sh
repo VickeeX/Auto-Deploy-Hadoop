@@ -2,6 +2,8 @@
 # if execute in fab command, too many unnecessary connections
 # use shell to install libs locally for each node first
 
+work_dir=$1
+
 # install java
 sudo apt-get update
 sudo apt-get install openjdk-8-jre openjdk-8-jdk -y
@@ -22,12 +24,12 @@ tar -zxvf hadoop-3.1.3.tar.gz
 cd ..
 
 # system env config for hadoop
-echo "export HADOOP_HOME=/root/bigData/hadoop-3.1.3" >> ~/.profile
+echo "export HADOOP_HOME=$work_dir/bigData/hadoop-3.1.3" >> ~/.profile
 echo "export PATH=\$PATH:\$HADOOP_HOME/bin:\$HADOOP_HOME/sbin" >> ~/.profile
 
 # haddoop env config
-echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> /root/bigData/hadoop-3.1.3/etc/hadoop/hadoop-env.sh
-echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> /root/bigData/hadoop-3.1.3/etc/hadoop/yarn-env.sh
+echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> $work_dir/bigData/hadoop-3.1.3/etc/hadoop/hadoop-env.sh
+echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> $work_dir/bigData/hadoop-3.1.3/etc/hadoop/yarn-env.sh
 
 echo '<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -44,7 +46,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
                 <name>hadoop.tmp.dir</name>
                 <value>file:/usr/local/hadoop/tmp</value>
         </property>
-</configuration>' > /root/bigData/hadoop-3.1.3/etc/hadoop/core-site.xml
+</configuration>' > $work_dir/bigData/hadoop-3.1.3/etc/hadoop/core-site.xml
 
 echo '<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -77,7 +79,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
                 <name>dfs.web.ugi</name>
                 <value>supergroup</value>
         </property>
-</configuration>' > /root/bigData/hadoop-3.1.3/etc/hadoop/hdfs-site.xml
+</configuration>' > $work_dir/bigData/hadoop-3.1.3/etc/hadoop/hdfs-site.xml
 
 echo '<?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -94,7 +96,7 @@ echo '<?xml version="1.0"?>
                 <name>mapreduce.jobhistory.webapp.address</name>
                 <value>blockchain-001:19888</value>
         </property>
-</configuration>' > /root/bigData/hadoop-3.1.3/etc/hadoop/mapred-site.xml
+</configuration>' > $work_dir/bigData/hadoop-3.1.3/etc/hadoop/mapred-site.xml
 
 echo '<?xml version="1.0"?>
 <configuration>
@@ -126,7 +128,7 @@ echo '<?xml version="1.0"?>
                 <name>yarn.resourcemanager.webapp.address</name>
                 <value>blockchain-001:8088</value>
         </property>
-</configuration>' > /root/bigData/hadoop-3.1.3/etc/hadoop/yarn-site.xml
+</configuration>' > $work_dir/bigData/hadoop-3.1.3/etc/hadoop/yarn-site.xml
 
 
 # stop ufw

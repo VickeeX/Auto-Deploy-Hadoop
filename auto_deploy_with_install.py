@@ -38,12 +38,12 @@ def get_arg_parser():
 @roles('slaves')
 def put_install_shell():
     with settings(warn_only=False):
-        put('/root/install_lib.sh', '/root/install_lib.sh', use_sudo=True)
+        put(work_dir + '/install_lib.sh', work_dir + '/install_lib.sh', use_sudo=True)
 
 
 @roles('all')
 def install_lib():
-    sudo('sh install_lib.sh')
+    sudo('sh install_lib.sh ' + work_dir)
     sudo('source ~/.profile')
 
 
@@ -72,8 +72,8 @@ def inject_admin_ssh_public_key():
     """ delete old ssh keys, generate new keys
     """
     with settings(warn_only=False):
-        sudo('rm -rf /root/.ssh/', shell=False)
-        sudo('yes | ssh-keygen -N "" -f /root/.ssh/id_rsa', shell=False)
+        sudo('rm -rf ' + work_dir + '/.ssh/', shell=False)
+        sudo('yes | ssh-keygen -N "" -f ' + work_dir + '/.ssh/id_rsa', shell=False)
 
 
 @roles('slaves')
@@ -81,8 +81,9 @@ def scan_host_ssh_public_key():
     """ collect pubulic keys of all nodes to master's authorized_keys
     """
     with settings(warn_only=False):
-        get('/root/.ssh/id_rsa.pub', '/root/.ssh/id_rsa.temp', use_sudo=True)
-        local('cat /root/.ssh/id_rsa.temp >> /root/.ssh/authorized_keys && rm -f /root/.ssh/id_rsa.temp')
+        get(work_dir + '/.ssh/id_rsa.pub', work_dir + '/.ssh/id_rsa.temp', use_sudo=True)
+        local(
+            'cat ' + work_dir + '/.ssh/id_rsa.temp >> ' + work_dir + '/.ssh/authorized_keys && rm -f ' + work_dir + '/.ssh/id_rsa.temp')
 
 
 @roles('slaves')
@@ -90,7 +91,7 @@ def put_authorized_keys():
     """ distribute the authorized_keys to each slave
     """
     with settings(warn_only=False):
-        put('/root/.ssh/authorized_keys', '/root/.ssh/authorized_keys', use_sudo=True)
+        put(work_dir + '/.ssh/authorized_keys', work_dir + '/.ssh/authorized_keys', use_sudo=True)
 
 
 @task
@@ -110,11 +111,11 @@ def local_hadoop_config(master, s):
     with settings(warn_only=False):
         run(
             'sed -i "s/blockchain-001/' + master + '/g" ' +
-            '/root/bigData/hadoop-3.1.3/etc/hadoop/core-site.xml ' +
-            '/root/bigData/hadoop-3.1.3/etc/hadoop/hdfs-site.xml ' +
-            '/root/bigData/hadoop-3.1.3/etc/hadoop/mapred-site.xml ' +
-            '/root/bigData/hadoop-3.1.3/etc/hadoop/yarn-site.xml')
-        run('echo "' + s + '" > /root/bigData/hadoop-3.1.3/etc/hadoop/workers')
+            work_dir + '/bigData/hadoop-3.1.3/etc/hadoop/core-site.xml ' +
+            work_dir + '/bigData/hadoop-3.1.3/etc/hadoop/hdfs-site.xml ' +
+            work_dir + '/bigData/hadoop-3.1.3/etc/hadoop/mapred-site.xml ' +
+            work_dir + '/bigData/hadoop-3.1.3/etc/hadoop/yarn-site.xml')
+        run('echo "' + s + '" > ' + work_dir + '/bigData/hadoop-3.1.3/etc/hadoop/workers')
 
 
 @task
@@ -139,7 +140,7 @@ def auto_deploy():
     # ssh free password automatic deployment
     execute(inject_admin_ssh_public_key)
     local(
-        'rm -f /root/.ssh/authorized_keys && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys')
+        'rm -f ' + work_dir + '/.ssh/authorized_keys && cat ' + work_dir + '/.ssh/id_rsa.pub > ' + work_dir + '/.ssh/authorized_keys')
     execute(scan_host_ssh_public_key)
     execute(put_authorized_keys)
     first_authorized_ssh(all_hosts)
@@ -155,10 +156,10 @@ def auto_deploy():
     # format
     local('hadoop namenode -format')
 
-    # start hadoop
-    # local('./root/bigData/hadoop-3.1.3/sbin/start-all.sh')
-    # stop hadoop
-    # local('./root/bigData/hadoop-3.1.3/sbin/stop-all.sh')
+    # # start hadoop
+    # local('.' + work_dir+'/bigData/hadoop-3.1.3/sbin/start-all.sh')
+    # # stop hadoop
+    # local('.' + work_dir+'/bigData/hadoop-3.1.3/sbin/stop-all.sh')
 
 
 def execute_fab_deploy(func):
@@ -168,6 +169,7 @@ def execute_fab_deploy(func):
 
 if __name__ == '__main__':
     args = get_arg_parser().parse_args()
+    work_dir = "/root" if args.user == 'root' else "/home/" + args.user
     all_nodes = args.master + args.slaves
     env.roledefs = {
         'all': all_nodes,
