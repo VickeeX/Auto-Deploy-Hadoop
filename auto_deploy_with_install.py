@@ -121,7 +121,6 @@ def local_hadoop_config(master, s):
 @task
 def auto_deploy():
     # install libs
-    # local('wget install.sh')  # TODO: put into github for wget
     execute(put_install_shell)
     execute(install_lib)
 
@@ -147,7 +146,7 @@ def auto_deploy():
 
     # hadoop configure modification
     execute(local_hadoop_config, all_hosts[args.master[0]], '\n'.join([all_hosts[ip] for ip in args.slaves]))
-    if env.user == 'sudo':
+    if env.user == 'root':
         local(
             'sed -i "2i HDFS_DATANODE_USER=root\nHDFS_DATANODE_SECURE_USER=hdfs\nHDFS_NAMENODE_USER=root\nHDFS_SECONDARYNAMENODE_USER=root" start-dfs.sh stop-dfs.sh')
         local(
