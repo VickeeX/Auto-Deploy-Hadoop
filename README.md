@@ -1,5 +1,7 @@
 # Auto-Deploy-Hadoop
-# use fabric execute on master 
+use fabric, only execute on master
+"-m" followed with master's ip, "-s" followed with slaves' ip
+
 ```
 $ apt-get install python-pip -y
 $ pip install fabric==1.14.0
