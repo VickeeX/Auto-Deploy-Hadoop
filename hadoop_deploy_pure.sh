@@ -111,7 +111,19 @@ printf '<?xml version="1.0"?>
                 <name>mapreduce.jobhistory.webapp.address</name>
                 <value>%s:19888</value>
         </property>
-</configuration>' "MASTER" "MASTER" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/mapred-site.xml
+                <property>
+                <name>yarn.app.mapreduce.am.env</name>
+                <value>HADOOP_MAPRED_HOME=%s/hadoop-3.1.3</value>
+        </property>
+        <property>
+                <name>mapreduce.map.env</name>
+                <value>HADOOP_MAPRED_HOME=%s/hadoop-3.1.3</value>
+        </property>
+        <property>
+                <name>mapreduce.reduce.env</name>
+                <value>HADOOP_MAPRED_HOME=%s/hadoop-3.1.3</value>
+        </property>
+</configuration>' "MASTER" "MASTER" "$WORK_DIR" "$WORK_DIR" "$WORK_DIR"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/mapred-site.xml
 
 printf '<?xml version="1.0"?>
 <configuration>
