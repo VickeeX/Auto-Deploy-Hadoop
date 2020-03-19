@@ -96,7 +96,20 @@ echo '<?xml version="1.0"?>
                 <name>mapreduce.jobhistory.webapp.address</name>
                 <value>blockchain-001:19888</value>
         </property>
+                <property>
+                <name>yarn.app.mapreduce.am.env</name>
+                <value>HADOOP_MAPRED_HOME=/home/vickee/bigData/hadoop-3.1.3</value>
+        </property>
+        <property>
+                <name>mapreduce.map.env</name>
+                <value>HADOOP_MAPRED_HOME=/home/vickee/bigData/hadoop-3.1.3</value>
+        </property>
+        <property>
+                <name>mapreduce.reduce.env</name>
+                <value>HADOOP_MAPRED_HOME=/home/vickee/bigData/hadoop-3.1.3</value>
+        </property>
 </configuration>' > $work_dir/bigData/hadoop-3.1.3/etc/hadoop/mapred-site.xml
+# TODO: modify path —— echo to printf
 
 echo '<?xml version="1.0"?>
 <configuration>

@@ -10,9 +10,17 @@
 # ...
 
 USER=$1
+NODES=$2
+REPLICATION_FACTOR=$3
+BUFFER_SIZE=$4
+
 WORK_DIR=/home/$USER
-MASTER=$2
-SLAVES=$3
+# shellcheck disable=SC2206
+NODES=(${NODES//,/ })
+MASTER=${NODES[0]}
+unset NODES[0]
+
+
 
 # apt-get
 apt-get update
@@ -55,13 +63,13 @@ printf '<?xml version="1.0" encoding="UTF-8"?>
         </property>
         <property>
                 <name>io.file.buffer.size</name>
-                <value>131072</value>
+                <value>%s</value>
         </property>
         <property>
                 <name>hadoop.tmp.dir</name>
                 <value>file:/usr/local/hadoop/tmp</value>
         </property>
-</configuration>' "$MASTER"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/core-site.xml
+</configuration>' "$MASTER" "$BUFFER_SIZE"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/core-site.xml
 
 printf '<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -80,7 +88,7 @@ printf '<?xml version="1.0" encoding="UTF-8"?>
         </property>
         <property>
                 <name>dfs.replication</name>
-                <value>2</value>
+                <value>%s</value>
         </property>
         <property>
                 <name>dfs.webhdfs.enabled</name>
@@ -94,7 +102,7 @@ printf '<?xml version="1.0" encoding="UTF-8"?>
                 <name>dfs.web.ugi</name>
                 <value>supergroup</value>
         </property>
-</configuration>' "MASTER" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/hdfs-site.xml
+</configuration>' "$MASTER" "$REPLICATION_FACTOR"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/hdfs-site.xml
 
 printf '<?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
@@ -123,7 +131,7 @@ printf '<?xml version="1.0"?>
                 <name>mapreduce.reduce.env</name>
                 <value>HADOOP_MAPRED_HOME=%s/hadoop-3.1.3</value>
         </property>
-</configuration>' "MASTER" "MASTER" "$WORK_DIR" "$WORK_DIR" "$WORK_DIR"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/mapred-site.xml
+</configuration>' "$MASTER" "$MASTER" "$WORK_DIR" "$WORK_DIR" "$WORK_DIR"> $WORK_DIR/hadoop-3.1.3/etc/hadoop/mapred-site.xml
 
 printf '<?xml version="1.0"?>
 <configuration>
@@ -155,9 +163,13 @@ printf '<?xml version="1.0"?>
                 <name>yarn.resourcemanager.webapp.address</name>
                 <value>%s:8088</value>
         </property>
-</configuration>' "MASTER" "MASTER" "MASTER" "MASTER" "MASTER" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/yarn-site.xml
+</configuration>' "$MASTER" "$MASTER" "$MASTER" "$MASTER" "$MASTER" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/yarn-site.xml
 
-printf '%s' "$SLAVES" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
+for var in ${NODES[@]}
+do
+   printf '%s\n' "$var" >> $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
+done
+
 
 # source cannot be recognized in dash shell (default)
 source $WORK_DIR/.profile
