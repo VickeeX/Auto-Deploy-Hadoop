@@ -164,9 +164,10 @@ printf '<?xml version="1.0"?>
         </property>
 </configuration>' "$MASTER" "$MASTER" "$MASTER" "$MASTER" "$MASTER" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/yarn-site.xml
 
+rm $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
 for var in ${NODES[@]}
 do
-   printf '%s\n' "$var" > $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
+   printf '%s\n' "$var" >> $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
 done
 
 sed -i "2i HDFS_DATANODE_USER=root\nHDFS_DATANODE_SECURE_USER=hdfs\nHDFS_NAMENODE_USER=root\nHDFS_SECONDARYNAMENODE_USER=root" $WORK_DIR/hadoop-3.1.3/sbin/start-dfs.sh $WORK_DIR/hadoop-3.1.3/sbin/stop-dfs.sh
