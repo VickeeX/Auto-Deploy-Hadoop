@@ -9,16 +9,15 @@
 # JAVA_VERSION, HADOOP_VERSION, HADOOP CONFIG (eg, replication_factor)
 # ...
 
-USER=$1
-NODES=$2
-REPLICATION_FACTOR=$3
-BUFFER_SIZE=$4
+NODES=$1
+REPLICATION_FACTOR=$2
+BUFFER_SIZE=$3
 
-WORK_DIR=/$USER
+WORK_DIR=/root
 # shellcheck disable=SC2206
 NODES=(${NODES//,/ })
 MASTER=${NODES[0]}
-unset NODES[0]
+unset 'NODES[0]'
 
 
 
@@ -170,17 +169,8 @@ do
    printf '%s\n' "$var" >> $WORK_DIR/hadoop-3.1.3/etc/hadoop/workers
 done
 
+sed -i "2i HDFS_DATANODE_USER=root\nHDFS_DATANODE_SECURE_USER=hdfs\nHDFS_NAMENODE_USER=root\nHDFS_SECONDARYNAMENODE_USER=root" $WORK_DIR/hadoop-3.1.3/sbin/start-dfs.sh $WORK_DIR/hadoop-3.1.3/sbin/stop-dfs.sh
+sed -i "2i YARN_RESOURCEMANAGER_USER=root\nHADOOP_SECURE_DN_USER=yarn\nYARN_NODEMANAGER_USER=root" $WORK_DIR/hadoop-3.1.3/sbin/start-yarn.sh $WORK_DIR/hadoop-3.1.3/sbin/stop-yarn.sh
 
-# source cannot be recognized in dash shell (default)
+# use `$source {shell_name}.sh {params}` to enable source
 source $WORK_DIR/.profile
-
-#    if env.user == 'root':
-#        local(
-#            'sed -i "2i HDFS_DATANODE_USER=root\nHDFS_DATANODE_SECURE_USER=hdfs\nHDFS_NAMENODE_USER=root\nHDFS_SECONDARYNAMENODE_USER=root" start-dfs.sh stop-dfs.sh')
-#        local(
-#            'sed -i "2i YARN_RESOURCEMANAGER_USER=root\nHADOOP_SECURE_DN_USER=yarn\nYARN_NODEMANAGER_USER=root" start-yarn.sh stop-yarn.sh')
-#
-#    # format
-#    if local—ip==MASTER:
-#        hadoop namenode -format
-#        ./$WORKDIR/hadoop-3.1.3/sbin/start-all.sh
